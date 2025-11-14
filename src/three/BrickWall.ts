@@ -63,12 +63,21 @@ export class BrickWall {
     worldWidth: number,
     worldDepth: number,
   ) {
+    let sumX = 0;
+    let sumY = 0;
+    for (const point of points) {
+      sumX += point.x;
+      sumY += point.y;
+    }
+    const centerX = sumX / points.length;
+    const centerY = sumY / points.length;
+
     const vectors = points.map(
       (point) =>
         new THREE.Vector3(
-          (point.x - 0.5) * worldWidth,
+          (point.x - centerX) * worldWidth,
           0,
-          (point.y - 0.5) * worldDepth,
+          (point.y - centerY) * worldDepth,
         ),
     );
     return new THREE.CatmullRomCurve3(vectors, false, 'catmullrom', 0.5);
