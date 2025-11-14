@@ -26,15 +26,6 @@
 - **Mesh/Screenshot buttons** – export the current wall as OBJ or capture a PNG of the viewport.
 
 ## Deployment
-Live demo: https://ekimroyrp.github.io/151113_BrickWaller/
-
-To rebuild locally and push a new GitHub Pages deployment:
-
-1. Make sure dependencies are installed (`npm install`).
-2. Run `npm run build` to regenerate the production bundle in `dist/`.
-3. `git checkout gh-pages`.
-4. Replace the branch contents with the freshly built files (copy everything from `dist/` to the repo root, remove the old files).
-5. Commit (`git commit -am "build: deploy for gh-pages"`) and push (`git push origin gh-pages`).
-6. Switch back to `main` (`git checkout main`) once the deployment is done.
-
-GitHub Pages is configured to serve directly from the `gh-pages` branch root, so pushing the updated static files will refresh the live demo.
+- **Local production preview:** `npm install`, then `npm run build` followed by `npm run preview` to serve the compiled bundle.
+- **Publish to GitHub Pages:** From `main`, run `npm run build`. Checkout `gh-pages`, copy everything from `dist/` into the branch root (replace existing files), commit, and `git push origin gh-pages`. Switch back to `main` afterwards.
+- **Live demo:** https://ekimroyrp.github.io/151113_BrickWaller/
