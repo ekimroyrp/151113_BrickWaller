@@ -190,16 +190,17 @@ export class BrickWall {
     }
     const placements: BrickPlacement[] = [];
     const { brickLength, rows } = params;
+    const EPSILON = 1e-4;
     for (let row = 0; row < rows; row += 1) {
       const rowOffset = row % 2 ? brickLength / 2 : 0;
       const usableLength = Math.max(totalLength - rowOffset, brickLength);
       const bricksInRow = Math.max(
         1,
-        Math.floor(usableLength / brickLength),
+        Math.floor((usableLength + EPSILON) / brickLength),
       );
       for (let i = 0; i < bricksInRow; i += 1) {
         const centerDistance = rowOffset + (i + 0.5) * brickLength;
-        if (centerDistance > totalLength) {
+        if (centerDistance > totalLength + EPSILON) {
           continue;
         }
         placements.push({ distance: centerDistance, row });
