@@ -282,13 +282,6 @@ export class BrickWall {
       });
 
       if (!flipFalloff) {
-        let start = closestIndex - Math.floor((bricksToKeep - 1) / 2);
-        start = Math.max(0, Math.min(start, totalBricks - bricksToKeep));
-        const end = start + bricksToKeep;
-        for (let i = start; i < end; i += 1) {
-          result.push(rowPlacements[i]);
-        }
-      } else {
         if (bricksToRemove <= 0) {
           result.push(...rowPlacements);
           continue;
@@ -304,6 +297,13 @@ export class BrickWall {
           if (i >= removeStart && i < removeEnd) {
             continue;
           }
+          result.push(rowPlacements[i]);
+        }
+      } else {
+        let start = closestIndex - Math.floor((bricksToKeep - 1) / 2);
+        start = Math.max(0, Math.min(start, totalBricks - bricksToKeep));
+        const end = start + bricksToKeep;
+        for (let i = start; i < end; i += 1) {
           result.push(rowPlacements[i]);
         }
       }

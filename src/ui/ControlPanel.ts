@@ -98,7 +98,7 @@ export class ControlPanel {
     const falloffNotes = document.createElement('ul');
     falloffNotes.className = 'control-panel__notes control-panel__notes--compact';
     falloffNotes.innerHTML = `
-      <li>Drag orange sphere in canvas to change falloff start.</li>
+      <li>Drag orange sphere in canvas to change falloff location.</li>
     `;
     this.container.appendChild(falloffNotes);
 
@@ -158,7 +158,7 @@ export class ControlPanel {
     const pathNotes = document.createElement('ul');
     pathNotes.className = 'control-panel__notes';
     pathNotes.innerHTML = `
-      <li>Drag the nodes to bend the wall path.</li>
+      <li>Drag the nodes to bend the path.</li>
       <li>Left click path to add node.</li>
       <li>Right click node to delete node.</li>
     `;
