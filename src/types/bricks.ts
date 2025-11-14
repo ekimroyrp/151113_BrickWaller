@@ -5,6 +5,7 @@ export interface BrickParameters {
   gap: number;
   falloff: number;
   rows: number;
+  flipFalloff: boolean;
 }
 
 export const DEFAULT_BRICK_PARAMETERS: BrickParameters = {
@@ -14,4 +15,5 @@ export const DEFAULT_BRICK_PARAMETERS: BrickParameters = {
   gap: 0.05,
   falloff: 0,
   rows: 8,
+  flipFalloff: false,
 };

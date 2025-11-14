@@ -214,7 +214,7 @@ export class BrickWall {
     curve: THREE.CatmullRomCurve3,
     falloffAnchor?: THREE.Vector3,
   ): BrickPlacement[] {
-    const { falloff, rows } = params;
+    const { falloff, rows, flipFalloff } = params;
     const clampedFalloff = Math.max(0, Math.min(falloff ?? 0, 1));
     if (
       clampedFalloff <= 0 ||
@@ -262,14 +262,13 @@ export class BrickWall {
         continue;
       }
       const rowFactor = rows > 1 ? row / (rows - 1) : 0;
-      const keepFraction = 1 - clampedFalloff * rowFactor;
-      if (keepFraction >= 0.999) {
-        result.push(...rowPlacements);
-        continue;
-      }
       const totalBricks = rowPlacements.length;
+      const keepFraction = 1 - clampedFalloff * rowFactor;
+      const removalFraction = clampedFalloff * rowFactor;
       let bricksToKeep = Math.max(1, Math.round(totalBricks * keepFraction));
       bricksToKeep = Math.min(totalBricks, bricksToKeep);
+      let bricksToRemove = Math.max(0, Math.round(totalBricks * removalFraction));
+      bricksToRemove = Math.min(totalBricks - 1, bricksToRemove);
 
       let closestIndex = 0;
       let bestDist = Number.POSITIVE_INFINITY;
@@ -281,11 +280,31 @@ export class BrickWall {
         }
       });
 
-      let start = closestIndex - Math.floor((bricksToKeep - 1) / 2);
-      start = Math.max(0, Math.min(start, totalBricks - bricksToKeep));
-      const end = start + bricksToKeep;
-      for (let i = start; i < end; i += 1) {
-        result.push(rowPlacements[i]);
+      if (!flipFalloff) {
+        let start = closestIndex - Math.floor((bricksToKeep - 1) / 2);
+        start = Math.max(0, Math.min(start, totalBricks - bricksToKeep));
+        const end = start + bricksToKeep;
+        for (let i = start; i < end; i += 1) {
+          result.push(rowPlacements[i]);
+        }
+      } else {
+        if (bricksToRemove <= 0) {
+          result.push(...rowPlacements);
+          continue;
+        }
+        let removeStart =
+          closestIndex - Math.floor((bricksToRemove - 1) / 2);
+        removeStart = Math.max(
+          0,
+          Math.min(removeStart, totalBricks - bricksToRemove),
+        );
+        const removeEnd = removeStart + bricksToRemove;
+        for (let i = 0; i < totalBricks; i += 1) {
+          if (i >= removeStart && i < removeEnd) {
+            continue;
+          }
+          result.push(rowPlacements[i]);
+        }
       }
     }
 

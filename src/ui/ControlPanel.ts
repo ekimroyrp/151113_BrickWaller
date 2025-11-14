@@ -71,6 +71,27 @@ export class ControlPanel {
     this.container.appendChild(sliderSection);
     SLIDERS.forEach((config) => this.createSlider(sliderSection, config));
 
+    const flipWrapper = document.createElement('label');
+    flipWrapper.className = 'control-panel__slider control-panel__slider--inline';
+    flipWrapper.innerHTML = `
+      <div class="control-panel__slider-head">
+        <span class="control-panel__label">Flip Falloff</span>
+      </div>
+    `;
+    const flipToggle = document.createElement('input');
+    flipToggle.type = 'checkbox';
+    flipToggle.className = 'control-panel__toggle';
+    flipToggle.checked = this.params.flipFalloff ?? false;
+    flipToggle.addEventListener('change', () => {
+      this.params = {
+        ...this.params,
+        flipFalloff: flipToggle.checked,
+      } as BrickParameters;
+      this.callbacks.onParamsChange(this.getParams());
+    });
+    flipWrapper.appendChild(flipToggle);
+    sliderSection.appendChild(flipWrapper);
+
     const divider = document.createElement('hr');
     divider.className = 'control-panel__divider';
     this.container.appendChild(divider);
