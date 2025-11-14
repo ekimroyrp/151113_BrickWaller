@@ -1,0 +1,100 @@
+:root {
+  font-family: "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  color: #f4f6fb;
+  background-color: #050607;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background: #050607;
+}
+
+body {
+  overflow: hidden;
+}
+
+.app-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.canvas-stack {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.webgl-surface {
+  width: 100%;
+  height: 100%;
+  display: block;
+  outline: none;
+}
+
+.curve-panel {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: min(360px, 32vw);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  flex-direction: column;
+  border-radius: 1rem;
+  background: rgba(5, 6, 7, 0.85);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
+  padding: 0.5rem 0.75rem 0.75rem;
+  backdrop-filter: blur(12px);
+  gap: 0.4rem;
+}
+
+.curve-panel__title {
+  margin: 0;
+  font-size: 0.9rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #9fb4d4;
+}
+
+.curve-panel__canvas {
+  flex: 1;
+  width: 100%;
+  border-radius: 0.75rem;
+  background: radial-gradient(circle at 10% 20%, rgba(16, 23, 36, 0.85), rgba(8, 9, 12, 0.95));
+  cursor: grab;
+}
+
+.curve-panel__canvas.dragging {
+  cursor: grabbing;
+}
+
+.curve-panel__hint {
+  margin: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.6);
+}
+
+.overlay-instructions {
+  position: absolute;
+  bottom: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 0.5rem 1rem;
+  border-radius: 999px;
+  background: rgba(0, 0, 0, 0.55);
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  color: #d6dde8;
+  pointer-events: none;
+}
