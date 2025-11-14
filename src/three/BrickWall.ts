@@ -338,9 +338,9 @@ export class BrickWall {
       effectiveWidth,
     );
     const material = new THREE.MeshStandardMaterial({
-      color: 0xd46a35,
-      roughness: 0.65,
-      metalness: 0.05,
+      color: 0xcfd2da,
+      roughness: 0.4,
+      metalness: 0.08,
     });
     this.mesh = new THREE.InstancedMesh(
       solidGeometry,
