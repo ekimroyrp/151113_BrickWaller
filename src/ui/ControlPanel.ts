@@ -43,9 +43,7 @@ export class ControlPanel {
     heading.innerHTML = `
       <div>
         <p class="control-panel__eyebrow">Brick Controls</p>
-        <h2 class="control-panel__title">Wall Designer</h2>
       </div>
-      <span class="control-panel__badge">v1</span>
     `;
     this.container.appendChild(heading);
 
@@ -63,7 +61,6 @@ export class ControlPanel {
     pathHeader.innerHTML = `
       <div>
         <p class="control-panel__eyebrow">Path Designer</p>
-        <h3 class="control-panel__subtitle">Curve sculpting</h3>
       </div>
     `;
     this.container.appendChild(pathHeader);

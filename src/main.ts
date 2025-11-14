@@ -17,7 +17,7 @@ appRoot.appendChild(controlsShell);
 const instructions = document.createElement('div');
 instructions.className = 'overlay-instructions';
 instructions.textContent =
-  'Scroll to orbit • Right click to pan • Drag handles to edit the curve';
+  'Left click to orbit • Right click to pan • Scroll to zoom';
 canvasStack.appendChild(instructions);
 
 const brickScene = new BrickScene(canvasStack, controlsShell);
