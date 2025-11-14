@@ -98,7 +98,7 @@ export class ControlPanel {
     const falloffNotes = document.createElement('ul');
     falloffNotes.className = 'control-panel__notes control-panel__notes--compact';
     falloffNotes.innerHTML = `
-      <li>Drag cyan sphere in canvas to change falloff start.</li>
+      <li>Drag orange sphere in canvas to change falloff start.</li>
     `;
     this.container.appendChild(falloffNotes);
 

@@ -93,9 +93,9 @@ export class BrickScene {
     this.falloffMarker = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 16, 16),
       new THREE.MeshStandardMaterial({
-        color: 0x4ff2ff,
-        emissive: 0x163238,
-        emissiveIntensity: 0.9,
+        color: 0xff9b50,
+        emissive: 0x40210c,
+        emissiveIntensity: 0.85,
       }),
     );
     this.falloffMarker.position.copy(this.falloffAnchor);
