@@ -13,8 +13,8 @@ export class BrickWall {
     THREE.BoxGeometry,
     THREE.MeshStandardMaterial
   > | null = null;
-  private readonly worldWidth = 30;
-  private readonly worldDepth = 14;
+  private readonly baseWorldWidth = 30;
+  private readonly baseWorldDepth = 14;
   private readonly axisReference = new THREE.Vector3(1, 0, 0);
   private readonly tempObject = new THREE.Object3D();
 
@@ -22,11 +22,29 @@ export class BrickWall {
     this.scene = scene;
   }
 
-  public update(points: CurvePoint[], params: BrickParameters) {
+  public update(
+    points: CurvePoint[],
+    params: BrickParameters,
+    targetLength?: number,
+  ) {
     if (points.length < 2) {
       return;
     }
-    const curve = this.createCurve(points);
+    const baseCurve = this.createCurve(
+      points,
+      this.baseWorldWidth,
+      this.baseWorldDepth,
+    );
+    let curve = baseCurve;
+    if (targetLength && targetLength > 0) {
+      const baseLength = baseCurve.getLength();
+      if (Number.isFinite(baseLength) && baseLength > 0) {
+        const scale = targetLength / baseLength;
+        const worldWidth = this.baseWorldWidth * scale;
+        const worldDepth = this.baseWorldDepth * scale;
+        curve = this.createCurve(points, worldWidth, worldDepth);
+      }
+    }
     const placements = this.computePlacements(curve, params);
     this.applyPlacements(curve, placements, params);
   }
@@ -40,13 +58,17 @@ export class BrickWall {
     }
   }
 
-  private createCurve(points: CurvePoint[]) {
+  private createCurve(
+    points: CurvePoint[],
+    worldWidth: number,
+    worldDepth: number,
+  ) {
     const vectors = points.map(
       (point) =>
         new THREE.Vector3(
-          (point.x - 0.5) * this.worldWidth,
+          (point.x - 0.5) * worldWidth,
           0,
-          (point.y - 0.5) * this.worldDepth,
+          (point.y - 0.5) * worldDepth,
         ),
     );
     return new THREE.CatmullRomCurve3(vectors, false, 'catmullrom', 0.5);

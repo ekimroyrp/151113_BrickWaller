@@ -6,6 +6,7 @@ import { CurveEditor } from './CurveEditor';
 interface ControlPanelCallbacks {
   onParamsChange: (params: BrickParameters) => void;
   onCurveChange: (points: CurvePoint[]) => void;
+  onPathLengthChange: (length: number) => void;
 }
 
 type SliderConfig = {
@@ -18,9 +19,9 @@ type SliderConfig = {
 };
 
 const SLIDERS: SliderConfig[] = [
-  { key: 'brickLength', label: 'Length', min: 0.4, max: 4, step: 0.05, unit: 'm' },
-  { key: 'brickWidth', label: 'Width', min: 0.2, max: 2, step: 0.05, unit: 'm' },
-  { key: 'brickHeight', label: 'Height', min: 0.1, max: 1, step: 0.02, unit: 'm' },
+  { key: 'brickLength', label: 'Length', min: 0.4, max: 4, step: 0.05, unit: '' },
+  { key: 'brickWidth', label: 'Width', min: 0.2, max: 2, step: 0.05, unit: '' },
+  { key: 'brickHeight', label: 'Height', min: 0.1, max: 1, step: 0.02, unit: '' },
   { key: 'rows', label: 'Rows', min: 1, max: 20, step: 1, unit: '' },
 ];
 
@@ -31,6 +32,7 @@ export class ControlPanel {
   private readonly callbacks: ControlPanelCallbacks;
   private readonly sliderValueEls = new Map<keyof BrickParameters, HTMLElement>();
   private params: BrickParameters = { ...DEFAULT_BRICK_PARAMETERS };
+  private pathLength = 24;
 
   constructor(host: HTMLElement, callbacks: ControlPanelCallbacks) {
     this.callbacks = callbacks;
@@ -65,6 +67,42 @@ export class ControlPanel {
     `;
     this.container.appendChild(pathHeader);
 
+    const pathLengthWrapper = document.createElement('label');
+    pathLengthWrapper.className = 'control-panel__slider';
+    const pathValue = document.createElement('span');
+    pathValue.className = 'control-panel__slider-value';
+
+    const pathInput = document.createElement('input');
+    pathInput.type = 'range';
+    pathInput.min = String(8);
+    pathInput.max = String(60);
+    pathInput.step = String(0.5);
+    pathInput.value = String(this.pathLength);
+    pathInput.className = 'control-panel__input';
+
+    const updatePathValue = () => {
+      const value = Number(pathInput.value);
+      pathValue.textContent = value.toFixed(1);
+    };
+    updatePathValue();
+
+    pathInput.addEventListener('input', () => {
+      this.pathLength = Number(pathInput.value);
+      updatePathValue();
+      this.callbacks.onPathLengthChange(this.pathLength);
+    });
+
+    pathLengthWrapper.innerHTML = `
+      <div class="control-panel__slider-head">
+        <span class="control-panel__label">Length</span>
+      </div>
+    `;
+    pathLengthWrapper
+      .querySelector('.control-panel__slider-head')
+      ?.appendChild(pathValue);
+    pathLengthWrapper.appendChild(pathInput);
+    this.container.appendChild(pathLengthWrapper);
+
     this.curveCanvas = document.createElement('canvas');
     this.curveCanvas.className = 'control-panel__curve-canvas';
     this.container.appendChild(this.curveCanvas);
@@ -97,6 +135,10 @@ export class ControlPanel {
 
   public getCurvePoints(): CurvePoint[] {
     return this.curveEditor.getPoints();
+  }
+
+  public getPathLength(): number {
+    return this.pathLength;
   }
 
   public destroy() {

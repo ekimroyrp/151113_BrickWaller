@@ -21,6 +21,7 @@ export class BrickScene {
   private animationId = 0;
   private currentCurve: CurvePoint[];
   private currentParams: BrickParameters;
+  private pathLength = 24;
 
   constructor(host: HTMLElement, controlsHost: HTMLElement) {
     this.host = host;
@@ -84,9 +85,14 @@ export class BrickScene {
         this.currentCurve = points;
         this.rebuildWall();
       },
+      onPathLengthChange: (length) => {
+        this.pathLength = length;
+        this.rebuildWall();
+      },
     });
     this.currentCurve = this.controlPanel.getCurvePoints();
     this.currentParams = this.controlPanel.getParams();
+    this.pathLength = this.controlPanel.getPathLength();
 
     this.setupEnvironment();
     this.handleResize();
@@ -119,7 +125,11 @@ export class BrickScene {
     if (!this.currentCurve || !this.currentParams) {
       return;
     }
-    this.brickWall.update(this.currentCurve, this.currentParams);
+    this.brickWall.update(
+      this.currentCurve,
+      this.currentParams,
+      this.pathLength,
+    );
   }
 
   private animate = () => {
