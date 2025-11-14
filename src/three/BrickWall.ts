@@ -187,7 +187,8 @@ export class BrickWall {
       return [];
     }
     const placements: BrickPlacement[] = [];
-    const { brickLength, rows } = params;
+    const { brickLength, rows, falloff } = params;
+    const clampedFalloff = Math.max(0, Math.min(falloff ?? 0, 1));
     for (let row = 0; row < rows; row += 1) {
       const rowOffset = row % 2 ? brickLength / 2 : 0;
       const usableLength = Math.max(totalLength - rowOffset, brickLength);
@@ -195,7 +196,16 @@ export class BrickWall {
         1,
         Math.floor(usableLength / brickLength),
       );
-      for (let i = 0; i < bricksInRow; i += 1) {
+
+      let bricksToKeep = bricksInRow;
+      if (row > 0 && clampedFalloff > 0 && rows > 1) {
+        const rowFactor = row / (rows - 1); // 0 at bottom, 1 at top row
+        const maxRemovable = Math.floor(bricksInRow * clampedFalloff);
+        const bricksToRemove = Math.floor(maxRemovable * rowFactor);
+        bricksToKeep = Math.max(1, bricksInRow - bricksToRemove);
+      }
+
+      for (let i = 0; i < bricksToKeep; i += 1) {
         const centerDistance = rowOffset + (i + 0.5) * brickLength;
         if (centerDistance > totalLength) {
           continue;

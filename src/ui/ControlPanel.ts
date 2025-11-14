@@ -26,6 +26,7 @@ const SLIDERS: SliderConfig[] = [
   { key: 'brickHeight', label: 'Height', min: 0.1, max: 1, step: 0.02, unit: '' },
   { key: 'gap', label: 'Gap', min: 0, max: 0.2, step: 0.005, unit: '' },
   { key: 'rows', label: 'Rows', min: 1, max: 20, step: 1, unit: '' },
+  { key: 'falloff', label: 'Falloff', min: 0, max: 1, step: 0.05, unit: '' },
 ];
 
 export class ControlPanel {
