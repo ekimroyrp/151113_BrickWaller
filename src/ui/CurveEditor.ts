@@ -229,13 +229,31 @@ export class CurveEditor {
     ctx.strokeStyle = 'rgba(255,255,255,0.08)';
     ctx.lineWidth = 1;
     const spacing = Math.max(20, Math.min(40, this.rectWidth / 10));
-    for (let x = 0; x <= this.rectWidth; x += spacing) {
+    const centerX = this.rectWidth / 2;
+    const centerY = this.rectHeight / 2;
+
+    // vertical lines from center outwards
+    for (let x = centerX; x >= 0; x -= spacing) {
       ctx.beginPath();
       ctx.moveTo(x, 0);
       ctx.lineTo(x, this.rectHeight);
       ctx.stroke();
     }
-    for (let y = 0; y <= this.rectHeight; y += spacing) {
+    for (let x = centerX + spacing; x <= this.rectWidth; x += spacing) {
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x, this.rectHeight);
+      ctx.stroke();
+    }
+
+    // horizontal lines from center outwards
+    for (let y = centerY; y >= 0; y -= spacing) {
+      ctx.beginPath();
+      ctx.moveTo(0, y);
+      ctx.lineTo(this.rectWidth, y);
+      ctx.stroke();
+    }
+    for (let y = centerY + spacing; y <= this.rectHeight; y += spacing) {
       ctx.beginPath();
       ctx.moveTo(0, y);
       ctx.lineTo(this.rectWidth, y);
@@ -325,10 +343,10 @@ export class CurveEditor {
 
   private createDefaultPoints(): CurvePoint[] {
     return [
-      { x: 0.1, y: 0.55 },
-      { x: 0.3, y: 0.55 },
-      { x: 0.6, y: 0.55 },
-      { x: 0.9, y: 0.55 },
+      { x: 0.1, y: 0.5 },
+      { x: 0.3, y: 0.5 },
+      { x: 0.7, y: 0.5 },
+      { x: 0.9, y: 0.5 },
     ];
   }
 

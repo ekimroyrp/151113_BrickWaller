@@ -199,6 +199,7 @@ body {
 .control-panel__export-row {
   display: flex;
   justify-content: flex-start;
+  gap: 0.5rem;
 }
 
 .control-panel__button {

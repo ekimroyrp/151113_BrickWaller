@@ -23,6 +23,7 @@ export class BrickScene {
   private currentParams: BrickParameters;
   private pathLength = 24;
   private readonly handleExportMesh: () => void;
+  private readonly handleScreenshot: () => void;
 
   constructor(host: HTMLElement, controlsHost: HTMLElement) {
     this.host = host;
@@ -30,6 +31,7 @@ export class BrickScene {
     this.scene.background = new THREE.Color(0x050607);
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
+      preserveDrawingBuffer: true,
     });
     this.renderer.shadowMap.enabled = true;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -93,6 +95,23 @@ export class BrickScene {
       URL.revokeObjectURL(url);
     };
 
+    this.handleScreenshot = () => {
+      const canvas = this.renderer.domElement;
+      try {
+        this.renderer.render(this.scene, this.camera);
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        link.href = dataUrl;
+        link.download = `brickwall-${timestamp}.png`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } catch {
+        // ignore screenshot errors
+      }
+    };
+
     this.brickWall = new BrickWall(this.scene);
     this.controlPanel = new ControlPanel(controlsHost, {
       onParamsChange: (params) => {
@@ -109,6 +128,9 @@ export class BrickScene {
       },
       onExportMesh: () => {
         this.handleExportMesh();
+      },
+      onScreenshot: () => {
+        this.handleScreenshot();
       },
     });
     this.currentCurve = this.controlPanel.getCurvePoints();

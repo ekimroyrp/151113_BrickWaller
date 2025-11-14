@@ -8,6 +8,7 @@ interface ControlPanelCallbacks {
   onCurveChange: (points: CurvePoint[]) => void;
   onPathLengthChange: (length: number) => void;
   onExportMesh: () => void;
+  onScreenshot: () => void;
 }
 
 type SliderConfig = {
@@ -128,12 +129,23 @@ export class ControlPanel {
 
     const exportRow = document.createElement('div');
     exportRow.className = 'control-panel__export-row';
-    const exportButton = document.createElement('button');
-    exportButton.type = 'button';
-    exportButton.className = 'control-panel__button';
-    exportButton.textContent = 'Mesh';
-    exportButton.addEventListener('click', () => this.callbacks.onExportMesh());
-    exportRow.appendChild(exportButton);
+
+    const meshButton = document.createElement('button');
+    meshButton.type = 'button';
+    meshButton.className = 'control-panel__button';
+    meshButton.textContent = 'Mesh';
+    meshButton.addEventListener('click', () => this.callbacks.onExportMesh());
+    exportRow.appendChild(meshButton);
+
+    const screenshotButton = document.createElement('button');
+    screenshotButton.type = 'button';
+    screenshotButton.className = 'control-panel__button';
+    screenshotButton.textContent = 'Screenshot';
+    screenshotButton.addEventListener('click', () =>
+      this.callbacks.onScreenshot(),
+    );
+    exportRow.appendChild(screenshotButton);
+
     this.container.appendChild(exportRow);
 
     this.curveEditor = new CurveEditor(this.curveCanvas);
