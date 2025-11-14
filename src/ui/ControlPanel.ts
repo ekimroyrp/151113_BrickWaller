@@ -65,13 +65,21 @@ export class ControlPanel {
         <p class="control-panel__eyebrow">Path Designer</p>
         <h3 class="control-panel__subtitle">Curve sculpting</h3>
       </div>
-      <p class="control-panel__helper">Drag the nodes to bend the wall path.</p>
     `;
     this.container.appendChild(pathHeader);
 
     this.curveCanvas = document.createElement('canvas');
     this.curveCanvas.className = 'control-panel__curve-canvas';
     this.container.appendChild(this.curveCanvas);
+
+    const pathNotes = document.createElement('ul');
+    pathNotes.className = 'control-panel__notes';
+    pathNotes.innerHTML = `
+      <li>Drag the nodes to bend the wall path.</li>
+      <li>Left click path to add node.</li>
+      <li>Right click node to delete node.</li>
+    `;
+    this.container.appendChild(pathNotes);
 
     this.curveEditor = new CurveEditor(this.curveCanvas);
     this.curveEditor.refreshSize();
