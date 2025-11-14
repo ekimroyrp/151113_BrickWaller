@@ -13,6 +13,9 @@ export class BrickWall {
     THREE.BoxGeometry,
     THREE.MeshStandardMaterial
   > | null = null;
+  private wireframeGroup: THREE.Group | null = null;
+  private wireframeGeometry: THREE.EdgesGeometry | null = null;
+  private wireframeMaterial: THREE.LineBasicMaterial | null = null;
   private readonly baseWorldWidth = 30;
   private readonly baseWorldDepth = 14;
   private readonly axisReference = new THREE.Vector3(1, 0, 0);
@@ -55,6 +58,18 @@ export class BrickWall {
       this.mesh.geometry.dispose();
       this.mesh.material.dispose();
       this.mesh = null;
+    }
+    if (this.wireframeGroup) {
+      this.scene.remove(this.wireframeGroup);
+      this.wireframeGroup = null;
+    }
+    if (this.wireframeGeometry) {
+      this.wireframeGeometry.dispose();
+      this.wireframeGeometry = null;
+    }
+    if (this.wireframeMaterial) {
+      this.wireframeMaterial.dispose();
+      this.wireframeMaterial = null;
     }
   }
 
@@ -201,7 +216,7 @@ export class BrickWall {
     if (placements.length === 0) {
       return;
     }
-    const geometry = new THREE.BoxGeometry(
+    const solidGeometry = new THREE.BoxGeometry(
       brickLength,
       brickHeight,
       brickWidth,
@@ -211,10 +226,26 @@ export class BrickWall {
       roughness: 0.65,
       metalness: 0.05,
     });
-    this.mesh = new THREE.InstancedMesh(geometry, material, placements.length);
+    this.mesh = new THREE.InstancedMesh(
+      solidGeometry,
+      material,
+      placements.length,
+    );
     this.mesh.castShadow = true;
     this.mesh.receiveShadow = true;
     this.scene.add(this.mesh);
+
+    this.wireframeGeometry = new THREE.EdgesGeometry(solidGeometry);
+    this.wireframeMaterial = new THREE.LineBasicMaterial({
+      color: 0xd3d7e0,
+      transparent: true,
+      opacity: 0.6,
+      linewidth: 1,
+    });
+    this.wireframeMaterial.depthWrite = false;
+    const wireGroup = new THREE.Group();
+    this.wireframeGroup = wireGroup;
+    this.scene.add(wireGroup);
 
     const totalLength = curve.getLength();
     placements.forEach((placement, index) => {
@@ -235,6 +266,16 @@ export class BrickWall {
       this.tempObject.scale.set(1, 1, 1);
       this.tempObject.updateMatrix();
       this.mesh!.setMatrixAt(index, this.tempObject.matrix);
+
+      if (this.wireframeGeometry && this.wireframeMaterial && this.wireframeGroup) {
+        const outline = new THREE.LineSegments(
+          this.wireframeGeometry,
+          this.wireframeMaterial,
+        );
+        outline.matrixAutoUpdate = false;
+        outline.matrix.copy(this.tempObject.matrix);
+        this.wireframeGroup.add(outline);
+      }
     });
     this.mesh.instanceMatrix.needsUpdate = true;
   }
