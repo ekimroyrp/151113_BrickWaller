@@ -52,6 +52,13 @@ export class CurveEditor {
     window.addEventListener('pointerleave', this.handlePointerUp);
   }
 
+  public destroy() {
+    this.canvas.removeEventListener('pointerdown', this.handlePointerDown);
+    window.removeEventListener('pointermove', this.handlePointerMove);
+    window.removeEventListener('pointerup', this.handlePointerUp);
+    window.removeEventListener('pointerleave', this.handlePointerUp);
+  }
+
   private handlePointerDown = (event: PointerEvent) => {
     const index = this.pickHandle(event);
     if (index === null) {

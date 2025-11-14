@@ -10,20 +10,9 @@ const canvasStack = document.createElement('div');
 canvasStack.className = 'canvas-stack';
 appRoot.appendChild(canvasStack);
 
-const curvePanel = document.createElement('div');
-curvePanel.className = 'curve-panel';
-const panelTitle = document.createElement('p');
-panelTitle.className = 'curve-panel__title';
-panelTitle.textContent = 'Path Designer';
-const curveCanvas = document.createElement('canvas');
-curveCanvas.className = 'curve-panel__canvas';
-const panelHint = document.createElement('p');
-panelHint.className = 'curve-panel__hint';
-panelHint.textContent = 'Drag handles to sculpt the route.';
-curvePanel.appendChild(panelTitle);
-curvePanel.appendChild(curveCanvas);
-curvePanel.appendChild(panelHint);
-canvasStack.appendChild(curvePanel);
+const controlsShell = document.createElement('div');
+controlsShell.className = 'controls-shell';
+appRoot.appendChild(controlsShell);
 
 const instructions = document.createElement('div');
 instructions.className = 'overlay-instructions';
@@ -31,6 +20,6 @@ instructions.textContent =
   'Scroll to orbit • Right click to pan • Drag handles to edit the curve';
 canvasStack.appendChild(instructions);
 
-const brickScene = new BrickScene(canvasStack, curveCanvas);
+const brickScene = new BrickScene(canvasStack, controlsShell);
 
 window.addEventListener('beforeunload', () => brickScene.dispose());

@@ -42,47 +42,160 @@ body {
   outline: none;
 }
 
-.curve-panel {
+.controls-shell {
   position: absolute;
-  top: 1rem;
-  right: 1rem;
-  width: min(360px, 32vw);
-  aspect-ratio: 4 / 3;
+  top: 1.25rem;
+  right: 1.25rem;
+  width: min(420px, 36vw);
+  z-index: 5;
+  pointer-events: none;
+}
+
+.control-panel {
+  pointer-events: auto;
+  width: 100%;
   display: flex;
   flex-direction: column;
-  border-radius: 1rem;
-  background: rgba(5, 6, 7, 0.85);
+  gap: 1rem;
+  border-radius: 1.5rem;
+  padding: 1.25rem;
+  background: linear-gradient(145deg, rgba(15, 16, 20, 0.95), rgba(8, 9, 12, 0.92));
   border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-  padding: 0.5rem 0.75rem 0.75rem;
-  backdrop-filter: blur(12px);
-  gap: 0.4rem;
+  box-shadow:
+    0 25px 45px rgba(0, 0, 0, 0.55),
+    inset 0 1px rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(18px);
 }
 
-.curve-panel__title {
+.control-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.control-panel__eyebrow {
   margin: 0;
-  font-size: 0.9rem;
-  letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #9fb4d4;
+  font-size: 0.7rem;
+  letter-spacing: 0.25em;
+  color: rgba(255, 255, 255, 0.65);
 }
 
-.curve-panel__canvas {
-  flex: 1;
+.control-panel__title {
+  margin: 0.15rem 0 0;
+  font-size: 1.4rem;
+  letter-spacing: 0.02em;
+}
+
+.control-panel__badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  font-size: 0.8rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.control-panel__section {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.control-panel__slider {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  padding: 0.6rem 0.5rem 0.8rem;
+  border-radius: 0.9rem;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.control-panel__slider-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.control-panel__label {
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+.control-panel__slider-value {
+  font-variant-numeric: tabular-nums;
+  font-size: 0.85rem;
+  color: rgba(255, 255, 255, 0.75);
+}
+
+.control-panel__input {
+  -webkit-appearance: none;
+  appearance: none;
   width: 100%;
-  border-radius: 0.75rem;
-  background: radial-gradient(circle at 10% 20%, rgba(16, 23, 36, 0.85), rgba(8, 9, 12, 0.95));
-  cursor: grab;
+  height: 3px;
+  border-radius: 3px;
+  background: rgba(255, 255, 255, 0.2);
+  outline: none;
 }
 
-.curve-panel__canvas.dragging {
-  cursor: grabbing;
+.control-panel__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fbd086, #ff9b50);
+  box-shadow: 0 4px 10px rgba(255, 155, 80, 0.45);
+  cursor: pointer;
 }
 
-.curve-panel__hint {
+.control-panel__input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(145deg, #fbd086, #ff9b50);
+  box-shadow: 0 4px 10px rgba(255, 155, 80, 0.45);
+  cursor: pointer;
+  border: none;
+}
+
+.control-panel__divider {
+  border: none;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.control-panel__subheading {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 0.75rem;
+}
+
+.control-panel__subtitle {
+  margin: 0.1rem 0 0;
+  font-size: 1.05rem;
+}
+
+.control-panel__helper {
   margin: 0;
   font-size: 0.75rem;
-  color: rgba(255, 255, 255, 0.6);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.control-panel__curve-canvas {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border-radius: 1rem;
+  background: radial-gradient(circle at 10% 20%, rgba(16, 23, 36, 0.85), rgba(8, 9, 12, 0.95));
+  cursor: grab;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.control-panel__curve-canvas.dragging {
+  cursor: grabbing;
 }
 
 .overlay-instructions {

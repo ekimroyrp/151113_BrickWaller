@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import type { CurvePoint } from '../types/curve';
-import type { BrickParameters } from '../ui/ControlsPanel';
+import type { BrickParameters } from '../types/bricks';
 
 interface BrickPlacement {
   distance: number;

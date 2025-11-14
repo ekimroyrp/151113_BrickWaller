@@ -1,8 +1,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
-import { ControlsPanel } from '../ui/ControlsPanel';
-import type { BrickParameters } from '../ui/ControlsPanel';
-import { CurveEditor } from '../ui/CurveEditor';
+import { ControlPanel } from '../ui/ControlPanel';
+import type { BrickParameters } from '../types/bricks';
 import type { CurvePoint } from '../types/curve';
 import { BrickWall } from './BrickWall';
 
@@ -12,14 +11,13 @@ export class BrickScene {
   private readonly camera: THREE.PerspectiveCamera;
   private readonly scene: THREE.Scene;
   private readonly controls: OrbitControls;
-  private readonly curveEditor: CurveEditor;
   private readonly brickWall: BrickWall;
-  private readonly controlsPanel: ControlsPanel;
+  private readonly controlPanel: ControlPanel;
   private animationId = 0;
   private currentCurve: CurvePoint[];
   private currentParams: BrickParameters;
 
-  constructor(host: HTMLElement, curveCanvas: HTMLCanvasElement) {
+  constructor(host: HTMLElement, controlsHost: HTMLElement) {
     this.host = host;
     this.scene = new THREE.Scene();
     this.scene.background = new THREE.Color(0x050607);
@@ -42,28 +40,24 @@ export class BrickScene {
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
 
-    this.curveEditor = new CurveEditor(curveCanvas);
     this.brickWall = new BrickWall(this.scene);
-    this.currentCurve = this.curveEditor.getPoints();
-
-    this.controlsPanel = new ControlsPanel((params) => {
-      this.currentParams = params;
-      this.rebuildWall();
+    this.controlPanel = new ControlPanel(controlsHost, {
+      onParamsChange: (params) => {
+        this.currentParams = params;
+        this.rebuildWall();
+      },
+      onCurveChange: (points) => {
+        this.currentCurve = points;
+        this.rebuildWall();
+      },
     });
-    this.currentParams = this.controlsPanel.getValues();
+    this.currentCurve = this.controlPanel.getCurvePoints();
+    this.currentParams = this.controlPanel.getParams();
 
     this.setupEnvironment();
-    this.registerCurveUpdates();
     this.handleResize();
     window.addEventListener('resize', this.handleResize);
     this.animate();
-  }
-
-  private registerCurveUpdates() {
-    this.curveEditor.onChange((points) => {
-      this.currentCurve = points;
-      this.rebuildWall();
-    });
   }
 
   private setupEnvironment() {
@@ -95,7 +89,7 @@ export class BrickScene {
     this.renderer.setSize(width, height);
     this.camera.aspect = width / Math.max(height, 1);
     this.camera.updateProjectionMatrix();
-    this.curveEditor.refreshSize();
+    this.controlPanel.refresh();
     this.rebuildWall();
   };
 
@@ -117,7 +111,7 @@ export class BrickScene {
     window.removeEventListener('resize', this.handleResize);
     this.controls.dispose();
     this.brickWall.dispose();
-    this.controlsPanel.destroy();
+    this.controlPanel.destroy();
     this.renderer.dispose();
   }
 }
