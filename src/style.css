@@ -67,6 +67,32 @@ body {
   backdrop-filter: blur(18px);
 }
 
+.control-panel__scroll {
+  pointer-events: auto;
+  width: 100%;
+  max-height: calc(100vh - 2.5rem);
+  overflow-y: auto;
+  padding-right: 0.35rem;
+}
+
+.control-panel__scroll::-webkit-scrollbar {
+  width: 6px;
+}
+
+.control-panel__scroll::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+}
+
+.control-panel__scroll::-webkit-scrollbar-thumb {
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.control-panel__scroll::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}
+
 .control-panel__heading {
   display: flex;
   align-items: center;

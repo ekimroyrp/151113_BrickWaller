@@ -50,7 +50,10 @@ export class ControlPanel {
     this.host = host;
     this.container = document.createElement('div');
     this.container.className = 'control-panel';
-    host.appendChild(this.container);
+    const scroller = document.createElement('div');
+    scroller.className = 'control-panel__scroll';
+    scroller.appendChild(this.container);
+    host.appendChild(scroller);
 
     const heading = document.createElement('div');
     heading.className = 'control-panel__heading';
