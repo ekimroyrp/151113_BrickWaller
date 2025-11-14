@@ -42,6 +42,9 @@ export class BrickScene {
       preserveDrawingBuffer: true,
     });
     this.renderer.shadowMap.enabled = true;
+    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     this.renderer.domElement.classList.add('webgl-surface');
     this.host.prepend(this.renderer.domElement);
@@ -177,14 +180,37 @@ export class BrickScene {
   }
 
   private setupEnvironment() {
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x1b1d25, 0.65);
+    const ambient = new THREE.AmbientLight(0x1a1d25, 0.3);
+    this.scene.add(ambient);
+
+    const hemi = new THREE.HemisphereLight(0xf2f6ff, 0x0a0c12, 0.55);
     this.scene.add(hemi);
 
-    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-    dir.position.set(6, 10, 6);
-    dir.castShadow = true;
-    dir.shadow.mapSize.set(2048, 2048);
-    this.scene.add(dir);
+    const keyLight = new THREE.DirectionalLight(0xffd6a3, 1.35);
+    keyLight.position.set(7, 14, 5);
+    keyLight.castShadow = true;
+    keyLight.shadow.mapSize.set(4096, 4096);
+    const keyCam = keyLight.shadow.camera as THREE.OrthographicCamera;
+    keyCam.left = -25;
+    keyCam.right = 25;
+    keyCam.top = 25;
+    keyCam.bottom = -25;
+    keyCam.near = 2;
+    keyCam.far = 60;
+    keyLight.shadow.bias = -0.0006;
+    keyLight.shadow.normalBias = 0.02;
+    this.scene.add(keyLight);
+
+    const rimLight = new THREE.DirectionalLight(0x8ec9ff, 0.55);
+    rimLight.position.set(-6, 9, -10);
+    this.scene.add(rimLight);
+
+    const bounce = new THREE.SpotLight(0xffe3ba, 0.4, 50, Math.PI / 3, 0.5);
+    bounce.position.set(0, 12, -8);
+    bounce.target.position.set(0, 0, 0);
+    bounce.castShadow = false;
+    this.scene.add(bounce);
+    this.scene.add(bounce.target);
   }
 
   private handleResize = () => {
