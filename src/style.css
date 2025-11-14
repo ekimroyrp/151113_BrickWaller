@@ -161,7 +161,7 @@ body {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.4);
   transition: transform 0.14s ease-out;
 }
@@ -173,7 +173,8 @@ body {
 
 .control-panel__toggle:checked::before {
   transform: translateX(14px);
-  background: #ff9b50;
+  background: linear-gradient(145deg, #fbd086, #ff9b50);
+  box-shadow: 0 3px 8px rgba(255, 155, 80, 0.5);
 }
 
 .control-panel__input {
