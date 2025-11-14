@@ -2,6 +2,11 @@ import type { CurvePoint } from '../types/curve';
 
 type ChangeHandler = (points: CurvePoint[]) => void;
 
+type CurveSample = {
+  point: CurvePoint;
+  segmentIndex: number;
+};
+
 const clamp = (value: number, min: number, max: number) =>
   Math.max(min, Math.min(max, value));
 
@@ -13,6 +18,7 @@ export class CurveEditor {
   private readonly handlers = new Set<ChangeHandler>();
   private rectWidth = 0;
   private rectHeight = 0;
+  private readonly cursorProximity = 18;
 
   constructor(canvas: HTMLCanvasElement) {
     this.canvas = canvas;
@@ -50,6 +56,7 @@ export class CurveEditor {
     window.addEventListener('pointermove', this.handlePointerMove);
     window.addEventListener('pointerup', this.handlePointerUp);
     window.addEventListener('pointerleave', this.handlePointerUp);
+    this.canvas.addEventListener('contextmenu', this.preventContextMenu);
   }
 
   public destroy() {
@@ -57,11 +64,22 @@ export class CurveEditor {
     window.removeEventListener('pointermove', this.handlePointerMove);
     window.removeEventListener('pointerup', this.handlePointerUp);
     window.removeEventListener('pointerleave', this.handlePointerUp);
+    this.canvas.removeEventListener('contextmenu', this.preventContextMenu);
   }
 
   private handlePointerDown = (event: PointerEvent) => {
+    if (event.button === 2) {
+      event.preventDefault();
+    }
     const index = this.pickHandle(event);
     if (index === null) {
+      if (event.button === 0) {
+        this.tryAddPoint(event);
+      }
+      return;
+    }
+    if (event.button === 2) {
+      this.removePoint(index);
       return;
     }
     this.draggingIndex = index;
@@ -108,12 +126,77 @@ export class CurveEditor {
   }
 
   private updatePointFromEvent(index: number, event: PointerEvent) {
-    const rect = this.canvas.getBoundingClientRect();
-    const normX = clamp((event.clientX - rect.left) / rect.width, 0, 1);
-    const normY = clamp((event.clientY - rect.top) / rect.height, 0, 1);
-    this.points[index] = { x: normX, y: normY };
+    const normalized = this.getNormalizedPointFromEvent(event);
+    this.points[index] = normalized;
     this.draw();
     this.emitChange();
+  }
+
+  private tryAddPoint(event: PointerEvent) {
+    const candidate = this.pickCurveInsertion(event);
+    if (!candidate) {
+      return;
+    }
+    this.insertPoint(candidate.point, candidate.segmentIndex + 1);
+  }
+
+  private pickCurveInsertion(event: PointerEvent) {
+    if (this.points.length < 2) {
+      return null;
+    }
+    const samples = this.sampleCurveSegments(240);
+    if (samples.length === 0) {
+      return null;
+    }
+    const rect = this.canvas.getBoundingClientRect();
+    const px = event.clientX - rect.left;
+    const py = event.clientY - rect.top;
+    let bestDist = this.cursorProximity * this.cursorProximity;
+    let best: CurveSample | null = null;
+    for (const sample of samples) {
+      const canvasPoint = this.toCanvasCoords(sample.point);
+      const dx = canvasPoint.x - px;
+      const dy = canvasPoint.y - py;
+      const dist = dx * dx + dy * dy;
+      if (dist < bestDist) {
+        bestDist = dist;
+        best = sample;
+      }
+    }
+    if (!best) {
+      return null;
+    }
+    return best;
+  }
+
+  private insertPoint(point: CurvePoint, index: number) {
+    this.points.splice(index, 0, point);
+    this.draw();
+    this.emitChange();
+  }
+
+  private removePoint(index: number) {
+    if (this.points.length <= 2) {
+      return;
+    }
+    this.points.splice(index, 1);
+    this.draw();
+    this.emitChange();
+  }
+
+  private getNormalizedPointFromEvent(event: PointerEvent) {
+    const rect = this.canvas.getBoundingClientRect();
+    const normX = clamp(
+      (event.clientX - rect.left) / Math.max(rect.width, 1),
+      0,
+      1,
+    );
+    const normY = clamp(
+      (event.clientY - rect.top) / Math.max(rect.height, 1),
+      0,
+      1,
+    );
+    return { x: normX, y: normY };
   }
 
   private emitChange() {
@@ -162,16 +245,16 @@ export class CurveEditor {
   }
 
   private drawCurve() {
-    if (this.points.length < 2) {
+    const samples = this.sampleCurveSegments(180);
+    if (samples.length < 2) {
       return;
     }
     const ctx = this.ctx;
-    const samples = this.sampleCurve(180);
     ctx.save();
     ctx.lineWidth = 3;
     ctx.strokeStyle = '#ff9b50';
     ctx.beginPath();
-    samples.forEach((point, index) => {
+    samples.forEach(({ point }, index) => {
       if (index === 0) {
         ctx.moveTo(point.x * this.rectWidth, point.y * this.rectHeight);
       } else {
@@ -198,16 +281,16 @@ export class CurveEditor {
     ctx.restore();
   }
 
-  private sampleCurve(segments: number): CurvePoint[] {
+  private sampleCurveSegments(segments: number): CurveSample[] {
     if (this.points.length < 2) {
-      return this.points;
+      return [];
     }
     const extended = [
       this.points[0],
       ...this.points,
       this.points[this.points.length - 1],
     ];
-    const output: CurvePoint[] = [];
+    const output: CurveSample[] = [];
     for (let i = 0; i < this.points.length - 1; i += 1) {
       const p0 = extended[i];
       const p1 = extended[i + 1];
@@ -216,8 +299,11 @@ export class CurveEditor {
       for (let j = 0; j <= segments; j += 1) {
         const t = j / segments;
         output.push({
-          x: this.catmull(p0.x, p1.x, p2.x, p3.x, t),
-          y: this.catmull(p0.y, p1.y, p2.y, p3.y, t),
+          point: {
+            x: this.catmull(p0.x, p1.x, p2.x, p3.x, t),
+            y: this.catmull(p0.y, p1.y, p2.y, p3.y, t),
+          },
+          segmentIndex: i,
         });
       }
     }
@@ -245,4 +331,8 @@ export class CurveEditor {
       { x: 0.9, y: 0.55 },
     ];
   }
+
+  private preventContextMenu = (event: MouseEvent) => {
+    event.preventDefault();
+  };
 }
