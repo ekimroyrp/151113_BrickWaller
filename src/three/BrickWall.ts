@@ -237,7 +237,7 @@ export class BrickWall {
 
     this.wireframeGeometry = new THREE.EdgesGeometry(solidGeometry);
     this.wireframeMaterial = new THREE.LineBasicMaterial({
-      color: 0xd3d7e0,
+      color: 0x4a4d55,
       transparent: true,
       opacity: 0.6,
       linewidth: 1,
