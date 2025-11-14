@@ -72,6 +72,12 @@ body {
   align-items: center;
   justify-content: space-between;
   gap: 1rem;
+  cursor: grab;
+  user-select: none;
+}
+
+.control-panel__heading.dragging {
+  cursor: grabbing;
 }
 
 .control-panel__eyebrow {

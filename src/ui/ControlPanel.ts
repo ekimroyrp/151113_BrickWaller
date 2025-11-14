@@ -33,11 +33,19 @@ export class ControlPanel {
   private readonly curveEditor: CurveEditor;
   private readonly callbacks: ControlPanelCallbacks;
   private readonly sliderValueEls = new Map<keyof BrickParameters, HTMLElement>();
+  private readonly host: HTMLElement;
+  private heading: HTMLDivElement | null = null;
   private params: BrickParameters = { ...DEFAULT_BRICK_PARAMETERS };
   private pathLength = 24;
+  private dragPointerId: number | null = null;
+  private dragStartX = 0;
+  private dragStartY = 0;
+  private hostOffsetX = 0;
+  private hostOffsetY = 0;
 
   constructor(host: HTMLElement, callbacks: ControlPanelCallbacks) {
     this.callbacks = callbacks;
+    this.host = host;
     this.container = document.createElement('div');
     this.container.className = 'control-panel';
     host.appendChild(this.container);
@@ -50,6 +58,11 @@ export class ControlPanel {
       </div>
     `;
     this.container.appendChild(heading);
+    this.heading = heading;
+    this.heading.addEventListener('pointerdown', this.handleDragPointerDown);
+    window.addEventListener('pointermove', this.handleDragPointerMove);
+    window.addEventListener('pointerup', this.handleDragPointerUp);
+    window.addEventListener('pointerleave', this.handleDragPointerUp);
 
     const sliderSection = document.createElement('div');
     sliderSection.className = 'control-panel__section';
@@ -175,6 +188,12 @@ export class ControlPanel {
 
   public destroy() {
     this.curveEditor.destroy();
+    if (this.heading) {
+      this.heading.removeEventListener('pointerdown', this.handleDragPointerDown);
+    }
+    window.removeEventListener('pointermove', this.handleDragPointerMove);
+    window.removeEventListener('pointerup', this.handleDragPointerUp);
+    window.removeEventListener('pointerleave', this.handleDragPointerUp);
     this.container.remove();
   }
 
@@ -216,4 +235,45 @@ export class ControlPanel {
     wrapper.appendChild(input);
     parent.appendChild(wrapper);
   }
+
+  private handleDragPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+    this.dragPointerId = event.pointerId;
+    this.dragStartX = event.clientX;
+    this.dragStartY = event.clientY;
+    this.heading?.classList.add('dragging');
+    this.heading?.setPointerCapture(event.pointerId);
+  };
+
+  private handleDragPointerMove = (event: PointerEvent) => {
+    if (this.dragPointerId === null || event.pointerId !== this.dragPointerId) {
+      return;
+    }
+    const dx = event.clientX - this.dragStartX;
+    const dy = event.clientY - this.dragStartY;
+    const x = this.hostOffsetX + dx;
+    const y = this.hostOffsetY + dy;
+    this.host.style.transform = `translate(${x}px, ${y}px)`;
+  };
+
+  private handleDragPointerUp = (event: PointerEvent) => {
+    if (this.dragPointerId === null || event.pointerId !== this.dragPointerId) {
+      return;
+    }
+    const dx = event.clientX - this.dragStartX;
+    const dy = event.clientY - this.dragStartY;
+    this.hostOffsetX += dx;
+    this.hostOffsetY += dy;
+    if (this.heading) {
+      this.heading.classList.remove('dragging');
+      try {
+        this.heading.releasePointerCapture(this.dragPointerId);
+      } catch {
+        // ignore
+      }
+    }
+    this.dragPointerId = null;
+  };
 }
