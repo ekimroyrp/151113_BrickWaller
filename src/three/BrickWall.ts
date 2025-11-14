@@ -29,6 +29,7 @@ export class BrickWall {
     points: CurvePoint[],
     params: BrickParameters,
     targetLength?: number,
+    falloffAnchor?: THREE.Vector3,
   ) {
     if (points.length < 2) {
       return;
@@ -48,7 +49,8 @@ export class BrickWall {
         curve = this.createCurve(points, worldWidth, worldDepth);
       }
     }
-    const placements = this.computePlacements(curve, params);
+    let placements = this.computePlacements(curve, params);
+    placements = this.applyFalloff(placements, params, curve, falloffAnchor);
     this.applyPlacements(curve, placements, params);
   }
 
@@ -187,8 +189,7 @@ export class BrickWall {
       return [];
     }
     const placements: BrickPlacement[] = [];
-    const { brickLength, rows, falloff } = params;
-    const clampedFalloff = Math.max(0, Math.min(falloff ?? 0, 1));
+    const { brickLength, rows } = params;
     for (let row = 0; row < rows; row += 1) {
       const rowOffset = row % 2 ? brickLength / 2 : 0;
       const usableLength = Math.max(totalLength - rowOffset, brickLength);
@@ -196,16 +197,7 @@ export class BrickWall {
         1,
         Math.floor(usableLength / brickLength),
       );
-
-      let bricksToKeep = bricksInRow;
-      if (row > 0 && clampedFalloff > 0 && rows > 1) {
-        const rowFactor = row / (rows - 1); // 0 at bottom, 1 at top row
-        const maxRemovable = Math.floor(bricksInRow * clampedFalloff);
-        const bricksToRemove = Math.floor(maxRemovable * rowFactor);
-        bricksToKeep = Math.max(1, bricksInRow - bricksToRemove);
-      }
-
-      for (let i = 0; i < bricksToKeep; i += 1) {
+      for (let i = 0; i < bricksInRow; i += 1) {
         const centerDistance = rowOffset + (i + 0.5) * brickLength;
         if (centerDistance > totalLength) {
           continue;
@@ -214,6 +206,90 @@ export class BrickWall {
       }
     }
     return placements;
+  }
+
+  private applyFalloff(
+    placements: BrickPlacement[],
+    params: BrickParameters,
+    curve: THREE.CatmullRomCurve3,
+    falloffAnchor?: THREE.Vector3,
+  ): BrickPlacement[] {
+    const { falloff, rows } = params;
+    const clampedFalloff = Math.max(0, Math.min(falloff ?? 0, 1));
+    if (
+      clampedFalloff <= 0 ||
+      !falloffAnchor ||
+      !Number.isFinite(rows) ||
+      rows <= 1
+    ) {
+      return placements;
+    }
+
+    const totalLength = curve.getLength();
+    if (!Number.isFinite(totalLength) || totalLength <= 0) {
+      return placements;
+    }
+
+    const sampleCount = 256;
+    let bestU = 0;
+    let bestDistSq = Number.POSITIVE_INFINITY;
+    const samplePoint = new THREE.Vector3();
+    for (let i = 0; i <= sampleCount; i += 1) {
+      const u = i / sampleCount;
+      curve.getPointAt(u, samplePoint);
+      const dx = samplePoint.x - falloffAnchor.x;
+      const dz = samplePoint.z - falloffAnchor.z;
+      const distSq = dx * dx + dz * dz;
+      if (distSq < bestDistSq) {
+        bestDistSq = distSq;
+        bestU = u;
+      }
+    }
+    const anchorDistance = bestU * totalLength;
+
+    const byRow = new Map<number, BrickPlacement[]>();
+    for (const placement of placements) {
+      const list = byRow.get(placement.row) ?? [];
+      list.push(placement);
+      byRow.set(placement.row, list);
+    }
+
+    const result: BrickPlacement[] = [];
+    for (const [row, rowPlacements] of byRow.entries()) {
+      rowPlacements.sort((a, b) => a.distance - b.distance);
+      if (row === 0) {
+        result.push(...rowPlacements);
+        continue;
+      }
+      const rowFactor = rows > 1 ? row / (rows - 1) : 0;
+      const keepFraction = 1 - clampedFalloff * rowFactor;
+      if (keepFraction >= 0.999) {
+        result.push(...rowPlacements);
+        continue;
+      }
+      const totalBricks = rowPlacements.length;
+      let bricksToKeep = Math.max(1, Math.round(totalBricks * keepFraction));
+      bricksToKeep = Math.min(totalBricks, bricksToKeep);
+
+      let closestIndex = 0;
+      let bestDist = Number.POSITIVE_INFINITY;
+      rowPlacements.forEach((placement, index) => {
+        const d = Math.abs(placement.distance - anchorDistance);
+        if (d < bestDist) {
+          bestDist = d;
+          closestIndex = index;
+        }
+      });
+
+      let start = closestIndex - Math.floor((bricksToKeep - 1) / 2);
+      start = Math.max(0, Math.min(start, totalBricks - bricksToKeep));
+      const end = start + bricksToKeep;
+      for (let i = start; i < end; i += 1) {
+        result.push(rowPlacements[i]);
+      }
+    }
+
+    return result;
   }
 
   private applyPlacements(

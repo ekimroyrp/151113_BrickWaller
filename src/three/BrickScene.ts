@@ -22,6 +22,14 @@ export class BrickScene {
   private currentCurve: CurvePoint[];
   private currentParams: BrickParameters;
   private pathLength = 24;
+  private readonly falloffAnchor: THREE.Vector3;
+  private readonly falloffMarker: THREE.Mesh<
+    THREE.SphereGeometry,
+    THREE.MeshStandardMaterial
+  >;
+  private readonly raycaster: THREE.Raycaster;
+  private readonly groundPlane: THREE.Plane;
+  private isDraggingFalloff = false;
   private readonly handleExportMesh: () => void;
   private readonly handleScreenshot: () => void;
 
@@ -77,6 +85,24 @@ export class BrickScene {
     this.shadowPlane.position.y = 0.01;
     this.shadowPlane.receiveShadow = true;
     this.scene.add(this.shadowPlane);
+
+    this.falloffAnchor = new THREE.Vector3(0, 0.01, 0);
+    this.falloffMarker = new THREE.Mesh(
+      new THREE.SphereGeometry(0.18, 16, 16),
+      new THREE.MeshStandardMaterial({
+        color: 0xff9b50,
+        emissive: 0x221408,
+        emissiveIntensity: 0.9,
+      }),
+    );
+    this.falloffMarker.position.copy(this.falloffAnchor);
+    this.falloffMarker.castShadow = false;
+    this.falloffMarker.receiveShadow = false;
+    this.falloffMarker.renderOrder = 10;
+    this.scene.add(this.falloffMarker);
+
+    this.raycaster = new THREE.Raycaster();
+    this.groundPlane = new THREE.Plane(new THREE.Vector3(0, 1, 0), 0);
 
     this.handleExportMesh = () => {
       const obj = this.brickWall.exportOBJ();
@@ -140,6 +166,13 @@ export class BrickScene {
     this.setupEnvironment();
     this.handleResize();
     window.addEventListener('resize', this.handleResize);
+    this.renderer.domElement.addEventListener(
+      'pointerdown',
+      this.handleFalloffPointerDown,
+    );
+    window.addEventListener('pointermove', this.handleFalloffPointerMove);
+    window.addEventListener('pointerup', this.handleFalloffPointerUp);
+    window.addEventListener('pointerleave', this.handleFalloffPointerUp);
     this.animate();
   }
 
@@ -172,6 +205,7 @@ export class BrickScene {
       this.currentCurve,
       this.currentParams,
       this.pathLength,
+      this.falloffAnchor,
     );
   }
 
@@ -184,6 +218,13 @@ export class BrickScene {
   public dispose() {
     cancelAnimationFrame(this.animationId);
     window.removeEventListener('resize', this.handleResize);
+    this.renderer.domElement.removeEventListener(
+      'pointerdown',
+      this.handleFalloffPointerDown,
+    );
+    window.removeEventListener('pointermove', this.handleFalloffPointerMove);
+    window.removeEventListener('pointerup', this.handleFalloffPointerUp);
+    window.removeEventListener('pointerleave', this.handleFalloffPointerUp);
     this.controls.dispose();
     this.brickWall.dispose();
     this.controlPanel.destroy();
@@ -194,6 +235,61 @@ export class BrickScene {
     gridMaterials.forEach((material) => material.dispose());
     this.shadowPlane.geometry.dispose();
     this.shadowPlane.material.dispose();
+    this.falloffMarker.geometry.dispose();
+    this.falloffMarker.material.dispose();
     this.renderer.dispose();
+  }
+
+  private handleFalloffPointerDown = (event: PointerEvent) => {
+    if (event.button !== 0) {
+      return;
+    }
+    const hit = this.getGroundIntersection(event);
+    if (!hit) {
+      return;
+    }
+    const threshold = 1;
+    if (hit.distanceToSquared(this.falloffAnchor) > threshold * threshold) {
+      return;
+    }
+    this.isDraggingFalloff = true;
+    this.controls.enabled = false;
+    this.updateFalloffAnchor(hit);
+    this.rebuildWall();
+  };
+
+  private handleFalloffPointerMove = (event: PointerEvent) => {
+    if (!this.isDraggingFalloff) {
+      return;
+    }
+    const hit = this.getGroundIntersection(event);
+    if (!hit) {
+      return;
+    }
+    this.updateFalloffAnchor(hit);
+    this.rebuildWall();
+  };
+
+  private handleFalloffPointerUp = () => {
+    if (!this.isDraggingFalloff) {
+      return;
+    }
+    this.isDraggingFalloff = false;
+    this.controls.enabled = true;
+  };
+
+  private getGroundIntersection(event: PointerEvent): THREE.Vector3 | null {
+    const rect = this.renderer.domElement.getBoundingClientRect();
+    const x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+    const y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+    this.raycaster.setFromCamera(new THREE.Vector2(x, y), this.camera);
+    const target = new THREE.Vector3();
+    const hit = this.raycaster.ray.intersectPlane(this.groundPlane, target);
+    return hit ?? null;
+  }
+
+  private updateFalloffAnchor(position: THREE.Vector3) {
+    this.falloffAnchor.set(position.x, 0.01, position.z);
+    this.falloffMarker.position.copy(this.falloffAnchor);
   }
 }
