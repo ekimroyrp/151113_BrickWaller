@@ -94,12 +94,13 @@ export class ControlPanel {
     });
     flipWrapper.appendChild(flipToggle);
     sliderSection.appendChild(flipWrapper);
+
     const falloffNotes = document.createElement('ul');
-    falloffNotes.className = 'control-panel__notes';
+    falloffNotes.className = 'control-panel__notes control-panel__notes--compact';
     falloffNotes.innerHTML = `
       <li>Drag cyan sphere in canvas to change falloff start.</li>
     `;
-    sliderSection.appendChild(falloffNotes);
+    this.container.appendChild(falloffNotes);
 
     const divider = document.createElement('hr');
     divider.className = 'control-panel__divider';

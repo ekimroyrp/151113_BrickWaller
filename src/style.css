@@ -266,6 +266,10 @@ body {
   line-height: 1.4;
 }
 
+.control-panel__notes--compact {
+  margin-bottom: 0.5rem;
+}
+
 .control-panel__notes li {
   margin: 0.15rem 0;
 }
