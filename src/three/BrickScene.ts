@@ -36,7 +36,7 @@ export class BrickScene {
   constructor(host: HTMLElement, controlsHost: HTMLElement) {
     this.host = host;
     this.scene = new THREE.Scene();
-    this.scene.background = new THREE.Color(0x050607);
+    this.scene.background = new THREE.Color(0x05090f);
     this.renderer = new THREE.WebGLRenderer({
       antialias: true,
       preserveDrawingBuffer: true,
