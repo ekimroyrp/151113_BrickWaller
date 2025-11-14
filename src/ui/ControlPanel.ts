@@ -24,6 +24,7 @@ const SLIDERS: SliderConfig[] = [
   { key: 'brickLength', label: 'Length', min: 0.4, max: 4, step: 0.05, unit: '' },
   { key: 'brickWidth', label: 'Width', min: 0.2, max: 2, step: 0.05, unit: '' },
   { key: 'brickHeight', label: 'Height', min: 0.1, max: 1, step: 0.02, unit: '' },
+  { key: 'gap', label: 'Gap', min: 0, max: 0.2, step: 0.005, unit: '' },
   { key: 'rows', label: 'Rows', min: 1, max: 20, step: 1, unit: '' },
 ];
 

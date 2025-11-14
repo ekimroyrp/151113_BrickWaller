@@ -211,15 +211,25 @@ export class BrickWall {
     placements: BrickPlacement[],
     params: BrickParameters,
   ) {
-    const { brickHeight, brickLength, brickWidth } = params;
+    const { brickHeight, brickLength, brickWidth, gap } = params;
     this.dispose();
     if (placements.length === 0) {
       return;
     }
+
+    const maxShrink = Math.max(
+      0,
+      Math.min(brickLength, brickWidth, brickHeight) - 0.01,
+    );
+    const clampedGap = Math.max(0, Math.min(gap, maxShrink));
+    const effectiveLength = Math.max(brickLength - clampedGap, 0.01);
+    const effectiveHeight = Math.max(brickHeight - clampedGap, 0.01);
+    const effectiveWidth = Math.max(brickWidth - clampedGap, 0.01);
+
     const solidGeometry = new THREE.BoxGeometry(
-      brickLength,
-      brickHeight,
-      brickWidth,
+      effectiveLength,
+      effectiveHeight,
+      effectiveWidth,
     );
     const material = new THREE.MeshStandardMaterial({
       color: 0xd46a35,
