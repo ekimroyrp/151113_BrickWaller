@@ -31,11 +31,11 @@ const SLIDERS: SliderConfig[] = [
 
 export class ControlPanel {
   private readonly container: HTMLDivElement;
+  private readonly wrapper: HTMLDivElement;
   private readonly curveCanvas: HTMLCanvasElement;
   private readonly curveEditor: CurveEditor;
   private readonly callbacks: ControlPanelCallbacks;
   private readonly sliderValueEls = new Map<keyof BrickParameters, HTMLElement>();
-  private readonly host: HTMLElement;
   private heading: HTMLDivElement | null = null;
   private params: BrickParameters = { ...DEFAULT_BRICK_PARAMETERS };
   private pathLength = 24;
@@ -47,13 +47,13 @@ export class ControlPanel {
 
   constructor(host: HTMLElement, callbacks: ControlPanelCallbacks) {
     this.callbacks = callbacks;
-    this.host = host;
     this.container = document.createElement('div');
     this.container.className = 'control-panel';
     const scroller = document.createElement('div');
     scroller.className = 'control-panel__scroll';
     scroller.appendChild(this.container);
     host.appendChild(scroller);
+    this.wrapper = scroller;
 
     const heading = document.createElement('div');
     heading.className = 'control-panel__heading';
@@ -227,7 +227,7 @@ export class ControlPanel {
     window.removeEventListener('pointermove', this.handleDragPointerMove);
     window.removeEventListener('pointerup', this.handleDragPointerUp);
     window.removeEventListener('pointerleave', this.handleDragPointerUp);
-    this.container.remove();
+    this.wrapper.remove();
   }
 
   private createSlider(parent: HTMLElement, config: SliderConfig) {
@@ -288,7 +288,7 @@ export class ControlPanel {
     const dy = event.clientY - this.dragStartY;
     const x = this.hostOffsetX + dx;
     const y = this.hostOffsetY + dy;
-    this.host.style.transform = `translate(${x}px, ${y}px)`;
+    this.wrapper.style.transform = `translate(${x}px, ${y}px)`;
   };
 
   private handleDragPointerUp = (event: PointerEvent) => {
