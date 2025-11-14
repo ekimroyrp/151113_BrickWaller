@@ -86,12 +86,12 @@ export class BrickScene {
     this.shadowPlane.receiveShadow = true;
     this.scene.add(this.shadowPlane);
 
-    this.falloffAnchor = new THREE.Vector3(0, 0.01, 0);
+    this.falloffAnchor = new THREE.Vector3(0, 0.01, 4);
     this.falloffMarker = new THREE.Mesh(
       new THREE.SphereGeometry(0.18, 16, 16),
       new THREE.MeshStandardMaterial({
-        color: 0xff9b50,
-        emissive: 0x221408,
+        color: 0x4ff2ff,
+        emissive: 0x163238,
         emissiveIntensity: 0.9,
       }),
     );
