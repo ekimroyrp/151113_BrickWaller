@@ -13,6 +13,11 @@ export class BrickScene {
   private readonly controls: OrbitControls;
   private readonly brickWall: BrickWall;
   private readonly controlPanel: ControlPanel;
+  private readonly gridHelper: THREE.GridHelper;
+  private readonly shadowPlane: THREE.Mesh<
+    THREE.PlaneGeometry,
+    THREE.ShadowMaterial
+  >;
   private animationId = 0;
   private currentCurve: CurvePoint[];
   private currentParams: BrickParameters;
@@ -39,6 +44,35 @@ export class BrickScene {
 
     this.controls = new OrbitControls(this.camera, this.renderer.domElement);
     this.controls.enableDamping = true;
+
+    const gridHelper = new THREE.GridHelper(
+      2000,
+      400,
+      0x4a4f59,
+      0xb6bcc8,
+    );
+    const gridMaterials = Array.isArray(gridHelper.material)
+      ? gridHelper.material
+      : [gridHelper.material];
+    gridMaterials.forEach((material) => {
+      material.transparent = true;
+      material.opacity = 0.22;
+      material.depthWrite = false;
+      material.depthTest = true;
+    });
+    gridHelper.position.y = 0;
+    gridHelper.renderOrder = -1;
+    this.scene.add(gridHelper);
+    this.gridHelper = gridHelper;
+
+    this.shadowPlane = new THREE.Mesh(
+      new THREE.PlaneGeometry(2000, 2000),
+      new THREE.ShadowMaterial({ opacity: 0.35 }),
+    );
+    this.shadowPlane.rotation.x = -Math.PI / 2;
+    this.shadowPlane.position.y = 0.01;
+    this.shadowPlane.receiveShadow = true;
+    this.scene.add(this.shadowPlane);
 
     this.brickWall = new BrickWall(this.scene);
     this.controlPanel = new ControlPanel(controlsHost, {
@@ -69,18 +103,6 @@ export class BrickScene {
     dir.castShadow = true;
     dir.shadow.mapSize.set(2048, 2048);
     this.scene.add(dir);
-
-    const ground = new THREE.Mesh(
-      new THREE.PlaneGeometry(80, 80),
-      new THREE.MeshStandardMaterial({
-        color: 0x0f141c,
-        roughness: 1,
-        metalness: 0,
-      }),
-    );
-    ground.rotation.x = -Math.PI / 2;
-    ground.receiveShadow = true;
-    this.scene.add(ground);
   }
 
   private handleResize = () => {
@@ -112,6 +134,13 @@ export class BrickScene {
     this.controls.dispose();
     this.brickWall.dispose();
     this.controlPanel.destroy();
+    this.gridHelper.geometry.dispose();
+    const gridMaterials = Array.isArray(this.gridHelper.material)
+      ? this.gridHelper.material
+      : [this.gridHelper.material];
+    gridMaterials.forEach((material) => material.dispose());
+    this.shadowPlane.geometry.dispose();
+    this.shadowPlane.material.dispose();
     this.renderer.dispose();
   }
 }
