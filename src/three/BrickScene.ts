@@ -22,6 +22,7 @@ export class BrickScene {
   private currentCurve: CurvePoint[];
   private currentParams: BrickParameters;
   private pathLength = 24;
+  private readonly handleExportMesh: () => void;
 
   constructor(host: HTMLElement, controlsHost: HTMLElement) {
     this.host = host;
@@ -75,6 +76,23 @@ export class BrickScene {
     this.shadowPlane.receiveShadow = true;
     this.scene.add(this.shadowPlane);
 
+    this.handleExportMesh = () => {
+      const obj = this.brickWall.exportOBJ();
+      if (!obj) {
+        return;
+      }
+      const blob = new Blob([obj], { type: 'text/plain' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+      link.href = url;
+      link.download = `brickwall-${timestamp}.obj`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    };
+
     this.brickWall = new BrickWall(this.scene);
     this.controlPanel = new ControlPanel(controlsHost, {
       onParamsChange: (params) => {
@@ -88,6 +106,9 @@ export class BrickScene {
       onPathLengthChange: (length) => {
         this.pathLength = length;
         this.rebuildWall();
+      },
+      onExportMesh: () => {
+        this.handleExportMesh();
       },
     });
     this.currentCurve = this.controlPanel.getCurvePoints();

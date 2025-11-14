@@ -7,6 +7,7 @@ interface ControlPanelCallbacks {
   onParamsChange: (params: BrickParameters) => void;
   onCurveChange: (points: CurvePoint[]) => void;
   onPathLengthChange: (length: number) => void;
+  onExportMesh: () => void;
 }
 
 type SliderConfig = {
@@ -115,6 +116,25 @@ export class ControlPanel {
       <li>Right click node to delete node.</li>
     `;
     this.container.appendChild(pathNotes);
+
+    const exportHeader = document.createElement('div');
+    exportHeader.className = 'control-panel__subheading';
+    exportHeader.innerHTML = `
+      <div>
+        <p class="control-panel__eyebrow">Export Options</p>
+      </div>
+    `;
+    this.container.appendChild(exportHeader);
+
+    const exportRow = document.createElement('div');
+    exportRow.className = 'control-panel__export-row';
+    const exportButton = document.createElement('button');
+    exportButton.type = 'button';
+    exportButton.className = 'control-panel__button';
+    exportButton.textContent = 'Mesh';
+    exportButton.addEventListener('click', () => this.callbacks.onExportMesh());
+    exportRow.appendChild(exportButton);
+    this.container.appendChild(exportRow);
 
     this.curveEditor = new CurveEditor(this.curveCanvas);
     this.curveEditor.refreshSize();

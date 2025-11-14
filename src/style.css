@@ -196,6 +196,45 @@ body {
   margin: 0.15rem 0;
 }
 
+.control-panel__export-row {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.control-panel__button {
+  padding: 0.55rem 1.1rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: radial-gradient(circle at 10% 0%, #2a3243, #151922);
+  color: #f5f7ff;
+  font-size: 0.8rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow:
+    0 8px 18px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+  transition:
+    background 0.15s ease-out,
+    transform 0.08s ease-out,
+    box-shadow 0.15s ease-out;
+}
+
+.control-panel__button:hover {
+  background: radial-gradient(circle at 10% 0%, #3b465a, #181d28);
+  transform: translateY(-1px);
+  box-shadow:
+    0 10px 22px rgba(0, 0, 0, 0.7),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15);
+}
+
+.control-panel__button:active {
+  transform: translateY(0);
+  box-shadow:
+    0 3px 10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
 .control-panel__curve-canvas {
   width: 100%;
   aspect-ratio: 4 / 3;

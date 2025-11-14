@@ -58,6 +58,86 @@ export class BrickWall {
     }
   }
 
+  public exportOBJ(): string | null {
+    if (!this.mesh) {
+      return null;
+    }
+    const geometry = this.mesh.geometry;
+    const position = geometry.getAttribute('position');
+    if (!position) {
+      return null;
+    }
+    const normalAttr = geometry.getAttribute('normal');
+    const indexAttr = geometry.getIndex();
+
+    const vertex = new THREE.Vector3();
+    const normal = new THREE.Vector3();
+    const matrix = new THREE.Matrix4();
+    const normalMatrix = new THREE.Matrix3();
+
+    let obj = '# BrickWall export\n';
+    let vertexOffset = 1;
+    let normalOffset = 1;
+
+    const instanceCount = this.mesh.count;
+    for (let instance = 0; instance < instanceCount; instance += 1) {
+      this.mesh.getMatrixAt(instance, matrix);
+      normalMatrix.getNormalMatrix(matrix);
+
+      for (let i = 0; i < position.count; i += 1) {
+        vertex.fromBufferAttribute(position, i);
+        vertex.applyMatrix4(matrix);
+        obj += `v ${vertex.x} ${vertex.y} ${vertex.z}\n`;
+      }
+
+      if (normalAttr) {
+        for (let i = 0; i < normalAttr.count; i += 1) {
+          normal.fromBufferAttribute(normalAttr, i);
+          normal.applyMatrix3(normalMatrix).normalize();
+          obj += `vn ${normal.x} ${normal.y} ${normal.z}\n`;
+        }
+      }
+
+      if (indexAttr) {
+        const indexArray = indexAttr.array as ArrayLike<number>;
+        for (let i = 0; i < indexArray.length; i += 3) {
+          const a = indexArray[i] + vertexOffset;
+          const b = indexArray[i + 1] + vertexOffset;
+          const c = indexArray[i + 2] + vertexOffset;
+          if (normalAttr) {
+            const na = indexArray[i] + normalOffset;
+            const nb = indexArray[i + 1] + normalOffset;
+            const nc = indexArray[i + 2] + normalOffset;
+            obj += `f ${a}//${na} ${b}//${nb} ${c}//${nc}\n`;
+          } else {
+            obj += `f ${a} ${b} ${c}\n`;
+          }
+        }
+      } else {
+        for (let i = 0; i < position.count; i += 3) {
+          const a = vertexOffset + i;
+          const b = vertexOffset + i + 1;
+          const c = vertexOffset + i + 2;
+          if (normalAttr) {
+            const na = normalOffset + i;
+            const nb = normalOffset + i + 1;
+            const nc = normalOffset + i + 2;
+            obj += `f ${a}//${na} ${b}//${nb} ${c}//${nc}\n`;
+          } else {
+            obj += `f ${a} ${b} ${c}\n`;
+          }
+        }
+      }
+
+      vertexOffset += position.count;
+      if (normalAttr) {
+        normalOffset += normalAttr.count;
+      }
+    }
+
+    return obj;
+  }
+
   private createCurve(
     points: CurvePoint[],
     worldWidth: number,
