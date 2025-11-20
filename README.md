@@ -28,4 +28,4 @@
 ## Deployment
 - **Local production preview:** `npm install`, then `npm run build` followed by `npm run preview` to serve the compiled bundle.
 - **Publish to GitHub Pages:** From `main`, run `npm run build`. Checkout `gh-pages`, copy everything from `dist/` into the branch root (replace existing files), commit, and `git push origin gh-pages`. Switch back to `main` afterwards.
-- **Live demo:** https://ekimroyrp.github.io/151113_BrickWaller/
+- **Live demo:** https://ekimroyrp.github.io/251113_BrickWaller/
